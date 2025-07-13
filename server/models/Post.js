@@ -14,9 +14,9 @@ const PostSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please provide content'],
     },
-    featuredImage: {
+    image: {
       type: String,
-      default: 'default-post.jpg',
+      required: true,
     },
     slug: {
       type: String,
@@ -30,7 +30,7 @@ const PostSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false, // Made optional for now
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -48,19 +48,23 @@ const PostSchema = new mongoose.Schema(
     },
     comments: [
       {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-        },
-        content: {
-          type: String,
-          required: true,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
+        _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        username: { type: String, required: true },
+        content: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
+        replies: [
+          {
+            _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+            username: { type: String, required: true },
+            content: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now },
+            updatedAt: { type: Date, default: Date.now }
+          }
+        ]
+      }
     ],
   },
   { timestamps: true }
@@ -97,4 +101,4 @@ PostSchema.methods.incrementViewCount = function () {
   return this.save();
 };
 
-module.exports = mongoose.model('Post', PostSchema); 
+module.exports = mongoose.model('Post', PostSchema);

@@ -11,6 +11,7 @@ const path = require('path');
 const postRoutes = require('./routes/posts');
 const categoryRoutes = require('./routes/categories');
 const authRoutes = require('./routes/auth');
+const pingRouter = require('./routes/ping');
 
 // Load environment variables
 dotenv.config();
@@ -37,8 +38,9 @@ if (process.env.NODE_ENV === 'development') {
 
 // API routes
 app.use('/api/posts', postRoutes);
-app.use('/api/categories', categoryRoutes);
+app.use('/api/categories', categoryRoutes); // <-- Categories route with DELETE now supported
 app.use('/api/auth', authRoutes);
+app.use('/api', pingRouter);
 
 // Root route
 app.get('/', (req, res) => {
@@ -71,8 +73,7 @@ mongoose
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
-  // Close server & exit process
   process.exit(1);
 });
 
-module.exports = app; 
+module.exports = app;

@@ -4,13 +4,10 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: '/api', // Adjust if your API base URL is different
 });
 
-// Add request interceptor for authentication
+// Add a request interceptor to include the token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,32 +16,19 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle authentication errors
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Post API services
 export const postService = {
-  // Get all posts with optional pagination and filters
-  getAllPosts: async (page = 1, limit = 10, category = null) => {
+  // Get all posts with optional pagination, search, and filters
+  getAllPosts: async (page = 1, limit = 10, category = null, search = '') => {
     let url = `/posts?page=${page}&limit=${limit}`;
     if (category) {
       url += `&category=${category}`;
+    }
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
     }
     const response = await api.get(url);
     return response.data;
@@ -100,6 +84,9 @@ export const categoryService = {
     const response = await api.post('/categories', categoryData);
     return response.data;
   },
+
+  // Delete a category
+  deleteCategory: (id) => api.delete(`/categories/${id}`),
 };
 
 // Auth API services
@@ -133,4 +120,4 @@ export const authService = {
   },
 };
 
-export default api; 
+export default api;
